@@ -23,10 +23,29 @@ def main():
     #print(gs.board) prints to terminal where pieces are
     loadImages()
     running = True
+    sqSelected = () #keeps track of the last click of the user (tuple: (row, col))
+    playerClicks = [] #keep track of player clicks (two tuples: [(6,4), (4,4)])
     while running:
         for e in py.event.get():
             if e.type == py.QUIT:
                 running = False
+            elif e.type == py.MOUSEBUTTONDOWN:
+                    location = py.mouse.get_pos() #x,y location of mouse
+                    col = location[0]//SQ_SIZE
+                    row = location[1]//SQ_SIZE
+                    if sqSelected == (row, col): #double clicking a square, undo action
+                        sqSelected = () #deselect
+                        playerClicks = [] #clear clicks
+                    else:
+                        sqSelected = (row, col)
+                        playerClicks.append(sqSelected)
+                    #was that the user's 2nd click?
+                    if len(playerClicks) ==2: #after 2nd click
+                        move = engine.Move(playerClicks[0], playerClicks[1], gs.board)
+                        print(move.getChessNotation())
+                        gs.makeMove(move)
+                        sqSelected = () #reset user clicks
+                        playerClicks = []
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         py.display.flip()
